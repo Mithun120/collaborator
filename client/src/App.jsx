@@ -7,6 +7,7 @@ import Blog from './screens/Blog'
 import Contact from './screens/Contact'
 import Navbar from './screens/Navbar'
 import Footer from './screens/Footer'
+import Tech from './screens/Tech'
 const App = () => {
   return (
     <div>
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/project" element={<Project />}/>
         <Route path="/blog" element ={<Blog/>}/>
         <Route path="/contact" element={<Contact/>}/>
+        <Route path="/ball" element={<Tech/>}/>
       </Routes>
       <Footer/>
       </BrowserRouter>
