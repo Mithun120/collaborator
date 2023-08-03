@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const uuidv4 = require('uuid/v4');
 const mongoose=require("mongoose")
+const {verifyAdmin}=require("../utils/verifyToken")
 // Blog model
 const Blog = require('../models/blog');
 const DIR = './public/';
@@ -46,7 +47,7 @@ router.get("/blogget", async (req, res) => {
 //     res.status(500).json({ error: "Internal server error!" });
 //   }
 // });
-router.post('/blogpost', upload.single('blogImg'), async (req, res) => {
+router.post('/blogpost', upload.single('blogImg'),verifyAdmin, async (req, res) => {
   const url = req.protocol + '://' + req.get('host');
   const newBlog = new Blog({
     _id: new mongoose.Types.ObjectId(),
@@ -64,14 +65,14 @@ router.post('/blogpost', upload.single('blogImg'), async (req, res) => {
   }
 });
 // Delete a blog post
-router.delete("/blogdelete/:id", async (req, res) => {
+router.delete("/blogdelete/:id", verifyAdmin,async (req, res) => {
   try {
     const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
     if (!deletedBlog) {
       return res.status(404).json({ error: "Blog post not found" });
     }
     res.status(200).json({ message: "Blog post deleted", deletedBlog });
-  } catch (err) {
+  } catch (err) { 
     res.status(500).json({ error: "Internal server error!" });
   }
 });

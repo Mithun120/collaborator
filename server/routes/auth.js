@@ -2,6 +2,7 @@ const router=require('express').Router();
 const bcrypt = require("bcrypt");
 const Users=require("./../models/admin")
 const jwt = require("jsonwebtoken");
+const JWT="eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY3NTg2NTEwOCwiaWF0IjoxNjc1ODY1MTA4fQ.3yUi0GJAK_oOB8CoVigMJrNSIZR7NCUw3GFGCfYP3Lk"
 
 router.post("/register", async(req, res) => {
   try {
@@ -13,29 +14,31 @@ router.post("/register", async(req, res) => {
       password: hash,
     });
     await newUser.save();
-    res.status(200).send("User created");
+    res.status(200).json("User created");
   } catch (err) {
     res.status(500).json(err);
   }
 });
-router.post("/login",async(req,res)=>{
+router.post("/login/auth",async(req,res)=>{
     try{
-        const user=await Users.findOne({username:req.body.username})
-        if(!user){
-            res.status(404).send("NO user found")
-        }
+        const user=await Users.findOne({email:req.body.email})
         const correctPass=await bcrypt.compare(req.body.password,user.password)
-        if(!correctPass){
-            res.status(400).send("Wrong password")
+        if(!user){
+            res.status(404).json("NO user found")
         }
-        const token=jwt.sign({id:user._id,isAdmin:user.isAdmin},process.env.JWT)
+        else if(!correctPass){
+            res.status(400).json("Wrong password")
+        }
+        else{
+          const token=jwt.sign({id:user._id,isAdmin:user.isAdmin},JWT)
               
-        const {password,isAdmin,...otherdetails}=user._doc;
-        res.cookie("access_token",token,{httpOnly:true,}).status(200).json({...otherdetails});
-        // res.status(200).json({...otherdetails})
-    }
+          const {password,isAdmin,...otherdetails}=user._doc;
+          res.cookie("access_token",token,{httpOnly:true,}).status(200).json("login successfull");
+          // res.status(200).json({...otherdetails})
+        }
+    } 
     catch(err){ 
-        res.status(500).json(err)
+      console.log(err)
     }
 })
 

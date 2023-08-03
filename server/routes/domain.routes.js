@@ -4,6 +4,7 @@ let express = require('express'),
     uuidv4 = require('uuid/v4'),
     router = express.Router();
 const DIR = './public/';
+const {verifyAdmin}=require("../utils/verifyToken")
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, DIR);
@@ -26,7 +27,7 @@ var upload = multer({
 });
 // User model
 let Domain = require('../models/domain');
-router.post('/domainpost', upload.single('DomainImg'), (req, res, next) => {
+router.post('/domainpost', upload.single('DomainImg'), verifyAdmin,(req, res, next) => {
     const url = req.protocol + '://' + req.get('host')
     const user = new Domain({
         _id: new mongoose.Types.ObjectId(),    
@@ -70,7 +71,7 @@ router.get('/domainget', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 }); 
-router.put('/domainput/:id', upload.single('domainImg'), async (req, res) => {
+router.put('/domainput/:id', upload.single('domainImg'), verifyAdmin,async (req, res) => {
   const url = req.protocol + '://' + req.get('host')
   console.log(req.body);
   const domainimgUrl = req.file ? url +"/public/"+ req.file.filename : null;
@@ -121,7 +122,7 @@ router.put('/domainput/:id', upload.single('domainImg'), async (req, res) => {
 // });
 
 //delete
-router.delete('/domaindelete/:domainId', (req, res, next) => {
+router.delete('/domaindelete/:domainId', verifyAdmin,(req, res, next) => {
     const userId = req.params.domainId;
     Domain.deleteOne({ _id: userId })
       .exec()

@@ -3,6 +3,7 @@ let express = require('express'),
     mongoose = require('mongoose'),
     uuidv4 = require('uuid/v4'),
     router = express.Router();
+const {verifyAdmin}=require("../utils/verifyToken.js")
 const DIR = './public/';
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -26,7 +27,8 @@ var upload = multer({
 });
 // User model
 let Client = require('../models/ourclients');
-router.post('/clientpost', upload.single('clientImg'), (req, res, next) => {
+const { verify } = require('jsonwebtoken');
+router.post('/clientpost', upload.single('clientImg'),verifyAdmin, (req, res, next) => {
     const url = req.protocol + '://' + req.get('host')
     const user = new Client({
         _id: new mongoose.Types.ObjectId(),    
@@ -69,7 +71,7 @@ router.get('/clientget', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 }); 
-router.put('/clientput/:id', upload.single('clientimg'), async (req, res) => {
+router.put('/clientput/:id', upload.single('clientImg'),verifyAdmin, async (req, res) => {
   const url = req.protocol + '://' + req.get('host')
   console.log(req.body);
   const domainimgUrl = req.file ? url +"/public/"+ req.file.filename : null;
@@ -119,7 +121,7 @@ router.put('/clientput/:id', upload.single('clientimg'), async (req, res) => {
 // });
 
 //delete
-router.delete('/clientdelete/:clientId', (req, res, next) => {
+router.delete('/clientdelete/:clientId', verifyAdmin,(req, res, next) => {
     const userId = req.params.clientId;
     Client.deleteOne({ _id: userId })
       .exec()

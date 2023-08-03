@@ -3,6 +3,7 @@ let express = require('express'),
     mongoose = require('mongoose'),
     uuidv4 = require('uuid/v4'),
     router = express.Router();
+const {verifyAdmin}=require("../utils/verifyToken.js")
 const DIR = './public/';
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -26,7 +27,7 @@ var upload = multer({
 });
 // User model
 let User = require('../models/User');
-router.post('/user-profile', upload.single('profileImg'), (req, res, next) => {
+router.post('/user-profile', upload.single('profileImg'),verifyAdmin, (req, res, next) => {
     const url = req.protocol + '://' + req.get('host')
     const user = new User({
         _id: new mongoose.Types.ObjectId(),
@@ -70,7 +71,7 @@ router.get('/api/user-profiles', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-router.put('/:id', upload.single('profileImg'), async (req, res) => {
+router.put('/:id', upload.single('profileImg'), verifyAdmin,async (req, res) => {
   const url = req.protocol + '://' + req.get('host')
   console.log(req.body);
   // const profileImgUrl = req.file ? url + req.file.filename : null;
@@ -126,7 +127,7 @@ console.log(profileImgUrl+" <= Profile Img");
 // });
 
 //delete
-router.delete('/:userId', (req, res, next) => {
+router.delete('/:userId', verifyAdmin,(req, res, next) => {
     const userId = req.params.userId;
     User.deleteOne({ _id: userId })
       .exec()
